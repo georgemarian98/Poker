@@ -1,3 +1,3 @@
 # Poker
 
-Poker in retea(oarecum) doar pentru linux
+Poker in retea(oarecum) pentru linux

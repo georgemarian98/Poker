@@ -195,16 +195,37 @@ void Poker::trimiteDate(const std::vector<_Carte>& cartiPuse,const Date& status,
 
 void Poker::bids()
 {
-	for(int i = 0, n = fdClientResp.size(); i < n; i++){
+	// for(int i = 0, n = fdClientResp.size(); i < n; i++){
+	// // 	char resp = 1;
+	// // 	CardSerialization::writeAction(fdClientResp[i], resp);
+
+	// 	//daca o dat fold decrementam i ca sa nu sarim peste un jucator
+	// 	if( handleInput( CardSerialization::readAction(fdClientRecv[i]), i) == true && i != n -1){
+	// 		i--;
+	// 		n--;
+	// 	}
+	// }
+	
+
+	unsigned int index = 0;
+	unsigned int n = fdClientRecv.size();
+	bool run = true;
+
+	while( run ){
 		char resp = 1;
-		CardSerialization::writeAction(fdClientResp[i], resp);
+		CardSerialization::writeAction(fdClientResp[ index ], resp);
 
 		//daca o dat fold decrementam i ca sa nu sarim peste un jucator
-		if( handleInput( CardSerialization::readAction(fdClientRecv[i]), i) == true && i != n -1){
-			i--;
+		if( handleInput( CardSerialization::readAction(fdClientRecv[ index ]), index) == true && index != n -1){
+			index--;
 			n--;
 		}
+
+		index = ( index + 1 ) % n;
+		run = !checkPlayers();
 	}
+
+	resetCheck();
 	
 	for(int fd : fdClientResp){
 		char resp = Exit;
@@ -220,6 +241,7 @@ bool Poker::handleInput(char input, int index)
 	{
 	case Check:
 		//Nu face nimic
+		m_jucatori[index].setCheck(true);
 		break;
 
 	case Fold:
@@ -254,4 +276,21 @@ bool Poker::handleInput(char input, int index)
 
 	return false;
 	
+}
+
+bool Poker::checkPlayers()
+{
+	for(Player jucator : m_jucatori){
+		if( jucator.getCheck() == false)
+			return false;
+	}
+
+	return true;
+}
+
+void Poker::resetCheck()
+{
+	for(int i = 0, n = m_jucatori.size(); i < n; i++){
+		m_jucatori[i].setCheck(false);
+	}
 }

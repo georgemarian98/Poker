@@ -5,6 +5,14 @@
 #include <fcntl.h>
 #include <termios.h>
 
+enum Date{
+	CartiMasa = 1,
+	CartiPlayer, Castigat, Exit
+};
+
+enum State {
+    Call = 1, Raise
+};
 
 Player::Player()
 {
@@ -62,7 +70,7 @@ bool Player::checkResponse(char response, std::vector<Carte>& cartiMasa)
     switch (response)
     {
         //sunt trimise cartile de pe masa
-        case 1:
+        case CartiMasa:
         {
             std::vector<Carte> aux = CardSerialization::readObject(sockFdRecv);
             cartiMasa.insert(cartiMasa.end(), aux.begin(), aux.end());
@@ -71,12 +79,12 @@ bool Player::checkResponse(char response, std::vector<Carte>& cartiMasa)
             break;
 
         // sunt trimise cartiile din mana jucatorului
-        case 2:
+        case CartiPlayer:
             m_cartiMana = CardSerialization::readObject(sockFdRecv);
             break;
 
         // sunt trimise datele referitoare la cine a castigat si sunt procesate datele
-        case 3:
+        case Castigat:
         {
             bool castigat = false;
 
@@ -107,6 +115,8 @@ bool Player::checkResponse(char response, std::vector<Carte>& cartiMasa)
             }
         }
 
+        case Exit:
+
         //iesire din joc
         default:
             return false;
@@ -130,18 +140,18 @@ void Player::writeAction(bool action)
 
 
     if(input){
-        unsigned char aux = -1; 
-
-        while( true ){
-            aux = CardSerialization::readAction(sockFdRecv);
-            if(aux == 4)
-                break;
-            
-            std::cout << "Ce alegi: ";
+        unsigned char actiune = -1; 
+        bool run = true;
+        
+        while( run ){
+            actiune = CardSerialization::readAction(sockFdRecv);
+            if(actiune == Exit)
+                break;  
 
             //Arunca ce era in bufferul de input a terminalului
             tcflush(STDIN_FILENO, TCIFLUSH);
         
+            std::cout << "Ce alegi: ";
             int resp;
             std::cin >> resp;
             CardSerialization::writeAction(sockFdResp, resp);

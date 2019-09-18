@@ -52,6 +52,9 @@ private:
     void trimiteDate( const std::vector<_Carte>& cartiPuse,const Date& status,const std::string& mesaj);
     bool handleInput(char input, int index);
 
+    bool checkPlayers();
+    void resetCheck();
+
 public:
     Poker();
     ~Poker();
