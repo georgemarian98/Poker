@@ -1,5 +1,4 @@
 #include "CardSerialization.h"
-
 /*
     1 - Carti puse pe masa
     2 - Carti playeri
@@ -49,6 +48,19 @@ bool CardSerialization::writeObject(int fd, const std::vector<_Carte>& input, co
             perror("Scriere simbol");
             return false;
         }
+    }
+
+    return true;
+}
+
+bool CardSerialization::writeObject(int fd,Player& jucator)
+{
+    CardSerialization::writeObject(fd, jucator.getCarti() , 2 , "");
+
+    unsigned int buget = jucator.getBuget();
+    if(write(fd, &buget, sizeof(buget)) < 0){
+        perror("Scriere buget");
+        return false;
     }
 
     return true;

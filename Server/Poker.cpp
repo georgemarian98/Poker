@@ -71,7 +71,8 @@ Poker::Poker()
 	//Trimiterea cartiilor din mana catre jucatori 
 	for(int i = 0; i < noJucatori; i++){
 		m_jucatori.push_back(Player( ));
-        CardSerialization::writeObject(fdClientResp[i], m_jucatori.back().getCarti(), Date::CartiPlayer , "");
+        // CardSerialization::writeObject(fdClientResp[i], m_jucatori.back().getCarti(), Date::CartiPlayer , "");
+        CardSerialization::writeObject(fdClientResp[i], m_jucatori.back());
 	}
 
     std::weak_ptr<Carte> carteArsa = Card::generareCarte( );
@@ -195,18 +196,6 @@ void Poker::trimiteDate(const std::vector<_Carte>& cartiPuse,const Date& status,
 
 void Poker::bids()
 {
-	// for(int i = 0, n = fdClientResp.size(); i < n; i++){
-	// // 	char resp = 1;
-	// // 	CardSerialization::writeAction(fdClientResp[i], resp);
-
-	// 	//daca o dat fold decrementam i ca sa nu sarim peste un jucator
-	// 	if( handleInput( CardSerialization::readAction(fdClientRecv[i]), i) == true && i != n -1){
-	// 		i--;
-	// 		n--;
-	// 	}
-	// }
-	
-
 	unsigned int index = 0;
 	unsigned int n = fdClientRecv.size();
 	bool run = true;
@@ -228,7 +217,7 @@ void Poker::bids()
 	resetCheck();
 	
 	for(int fd : fdClientResp){
-		char resp = Exit;
+		unsigned char resp = Exit;
 		CardSerialization::writeAction(fd, resp);
 	}
 }

@@ -25,6 +25,7 @@ private:
 
     bool input = false;
     std::vector<Carte> m_cartiMana;
+    unsigned int buget = 0;
 
 private:
     bool checkResponse(char response, std::vector<Carte>& cartiMasa);

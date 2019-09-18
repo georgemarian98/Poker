@@ -66,12 +66,3 @@ std::vector<Carte> CardSerialization::readObject(int fd)
     return output;
 }
 
-unsigned char CardSerialization::readAction(int fd)
-{
-    unsigned char action = -1;
-    if(read(fd, &action, sizeof(action) ) < 0){
-            perror("Citire actiune");
-            return action;
-    }
-    return action;
-}

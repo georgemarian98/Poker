@@ -8,7 +8,7 @@ class Player
 {
 private:
 	_Carte carti[2];
-	int buget;
+	unsigned int buget;
 	bool check = false;
 
 public:
@@ -18,6 +18,7 @@ public:
 
 	void setCheck(bool _check) { this->check = _check;};
 	bool getCheck() { return check;};
+	unsigned int& getBuget() { return buget;};
 	   
 	friend std::ostream& operator<< (std::ostream& out, const Player& jucator){
 		out << *jucator.carti[0] << " " << *jucator.carti[1];

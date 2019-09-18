@@ -53,7 +53,7 @@ void Player::run()
 
     while ( run ){
         //flag pentru datele ce urmeaza sa fie trimise
-        const unsigned char flag = CardSerialization::readAction(sockFdRecv);
+        const unsigned char flag = CardSerialization::readAction<unsigned char>(sockFdRecv);
         
         std::system("clear");
         run = checkResponse(flag, CartiMasa);
@@ -81,6 +81,7 @@ bool Player::checkResponse(char response, std::vector<Carte>& cartiMasa)
         // sunt trimise cartiile din mana jucatorului
         case CartiPlayer:
             m_cartiMana = CardSerialization::readObject(sockFdRecv);
+            buget = CardSerialization::readAction<unsigned int>(sockFdRecv);
             break;
 
         // sunt trimise datele referitoare la cine a castigat si sunt procesate datele
@@ -137,6 +138,7 @@ void Player::writeAction(bool action)
     std::cout << "2) Fold\n";
     std::cout << "3) Call\n";
     std::cout << "4) Raise\n";
+    std::cout << "Buget: " << buget << std::endl;
 
 
     if(input){
@@ -144,7 +146,7 @@ void Player::writeAction(bool action)
         bool run = true;
         
         while( run ){
-            actiune = CardSerialization::readAction(sockFdRecv);
+            actiune = CardSerialization::readAction<unsigned char>(sockFdRecv);
             if(actiune == Exit)
                 break;  
 
