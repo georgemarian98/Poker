@@ -97,8 +97,8 @@ bool Player::checkResponse(char response, std::vector<Carte>& cartiMasa)
             std::vector<Carte> cartiCastigatoare = CardSerialization::readObject(sockFdRecv);
 
             //Verificam daca cartiile castigatoare trimise sunt cele din mana jucatorului
-            for(Carte castigatori : cartiCastigatoare){
-                for(Carte cartiPlayer : m_cartiMana){
+            for(const Carte& castigatori : cartiCastigatoare){
+                for(const Carte& cartiPlayer : m_cartiMana){
                     if( castigatori == cartiPlayer){
                         castigat = true;
                         break;
@@ -163,8 +163,8 @@ void Player::writeAction(bool action)
 
 void Player::afisare(const std::vector<Carte>& carti)
 {    
-    for(Carte aux : carti){
-        std::cout <<  aux << " " ;
+    for(const Carte& carte : carti){
+        std::cout <<  carte << " " ;
     }
     std::cout << std::endl;
 }

@@ -6,6 +6,17 @@
     4 - Exit
 */
 
+std::shared_ptr< CardSerialization> CardSerialization::instance = NULL;
+
+std::shared_ptr< CardSerialization> CardSerialization::getInstance(const int port)
+{
+    if( instance == nullptr){
+        instance = std::shared_ptr< CardSerialization>(new CardSerialization(port));
+    }
+
+    return instance;
+}
+
 bool CardSerialization::writeObject(int fd, const std::vector<_Carte>& input, const char& flag, const std::string& mesaj)
 {
     const unsigned char count = input.size();

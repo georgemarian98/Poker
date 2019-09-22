@@ -7,6 +7,7 @@
 
 Poker::Poker()
 {
+	server = CardSerialization::getInstance(port);
     //////////////////// Partea de server ////////////////////
     struct sockaddr_in serv_addr;
 
@@ -27,7 +28,6 @@ Poker::Poker()
     }
 
     while( true ){
-		std::system("clear");
     	std::cout << "Asteptam clienti!\n";
 
 		//Response - trimite date 
@@ -71,7 +71,6 @@ Poker::Poker()
 	//Trimiterea cartiilor din mana catre jucatori 
 	for(int i = 0; i < noJucatori; i++){
 		m_jucatori.push_back(Player( ));
-        // CardSerialization::writeObject(fdClientResp[i], m_jucatori.back().getCarti(), Date::CartiPlayer , "");
         CardSerialization::writeObject(fdClientResp[i], m_jucatori.back());
 	}
 
@@ -100,7 +99,7 @@ Poker::~Poker()
 
     close(listenFd);
 
-    for(auto combinatii : combinatiiPosibile){
+    for(auto& combinatii : combinatiiPosibile){
 		delete combinatii;
 	}
 	
@@ -130,10 +129,10 @@ void Poker::check( )
 	//hash map sortat
 	std::map<Mesaj, std::vector<Player>,Greater> castigatori;
 	
-	for(auto jucator : m_jucatori){
+	for(auto& jucator : m_jucatori){
 		std::set<Combo*, Comparable> combinatii;
 		
-		for(auto combinatie : combinatiiPosibile){
+		for(auto const& combinatie : combinatiiPosibile){
 			//daca are combinatia o punem in set
 			if(combinatie->check(m_cartiAratate, jucator.getCarti( )) == true){
 				combinatii.insert(combinatie);
@@ -151,13 +150,13 @@ void Poker::check( )
 	cartiCastigatoare.reserve( 2 * castigatori.begin( )->second.size() );
 
 	//punem cartiile jucatoriilor castigatori impreuna sa le trimitem odata
-	for(auto castigator : castigatori.begin( )->second){
+	for(auto& castigator : castigatori.begin( )->second){
 		std::vector<_Carte> aux = castigator.getCarti();
 		cartiCastigatoare.insert(cartiCastigatoare.end(), aux.begin(), aux.end());
 	}
 
 	//trimitem datele
-    for(int fd : fdClientResp){
+    for(const int& fd : fdClientResp){
         CardSerialization::writeObject(fd, cartiCastigatoare , Date::Castigat , mesaj);
     }
 }
@@ -189,7 +188,7 @@ void Poker::run( )
 
 void Poker::trimiteDate(const std::vector<_Carte>& cartiPuse,const Date& status,const std::string& mesaj  )
 {
-    for(int fd : fdClientResp){
+    for(const int& fd : fdClientResp){
         CardSerialization::writeObject(fd , cartiPuse, status , mesaj);
     }
 }
@@ -216,7 +215,7 @@ void Poker::bids()
 
 	resetCheck();
 	
-	for(int fd : fdClientResp){
+	for(const int& fd : fdClientResp){
 		unsigned char resp = Exit;
 		CardSerialization::writeAction(fd, resp);
 	}
@@ -269,7 +268,7 @@ bool Poker::handleInput(char input, int index)
 
 bool Poker::checkPlayers()
 {
-	for(Player jucator : m_jucatori){
+	for(Player& jucator : m_jucatori){
 		if( jucator.getCheck() == false)
 			return false;
 	}

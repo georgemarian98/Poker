@@ -38,6 +38,7 @@ private:
     const int port = 5000;
     std::vector<int> fdClientRecv;
     std::vector<int> fdClientResp;
+    std::shared_ptr< CardSerialization> server;
 
     //Poker
     std::vector<Player> m_jucatori;
