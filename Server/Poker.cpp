@@ -1,77 +1,19 @@
 #include "Poker.h"
-#include <semaphore.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-
 
 Poker::Poker()
 {
-	server = CardSerialization::getInstance(port);
-    //////////////////// Partea de server ////////////////////
-    struct sockaddr_in serv_addr;
-
-    listenFd = socket(AF_INET, SOCK_STREAM, 0);
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(port);
-
-    if (bind(listenFd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0){
-        perror("bind");
-        exit(-1);
-    }
-
-    if (listen(listenFd, 10) == -1){
-        perror("Failed to listen\n");
-        exit(-1);
-    }
-
-    while( true ){
-    	std::cout << "Asteptam clienti!\n";
-
-		//Response - trimite date 
-        int connfdResp = accept(listenFd, (struct sockaddr *)NULL, NULL);
-        if (connfdResp < 0){
-            perror("accept response");
-            exit(-1);
-        }
-
-		//Receive primeste date
-        int connfdRecv = accept(listenFd, (struct sockaddr *)NULL, NULL);
-		if (connfdRecv < 0){
-            perror("accept receive");
-            exit(-1);
-        }
-
-        fdClientResp.push_back(connfdResp);
-        fdClientRecv.push_back(connfdRecv);
-
-		int nr = fdClientResp.size();
-        std::cout << "Nr jucatori: " << nr << std::endl;
-
-		if(nr >= 2){
-			std::cout << "Incepem jocul? [Y/N]\n";
-
-			tcflush(STDIN_FILENO, TCIFLUSH);
-			char raspuns;
-			std::cin >> raspuns;
-
-			if(raspuns == 'Y' || raspuns == 'y')
-				break;
-		}
-
-    }
+	m_server = CardSerialization::getInstance(port);
 
     //////////////////// Partea de joc ////////////////////
 
-    int noJucatori = fdClientResp.size();
+    int noJucatori = m_server->getNoClienti();
     m_jucatori.reserve(noJucatori);
 
 	//Trimiterea cartiilor din mana catre jucatori 
 	for(int i = 0; i < noJucatori; i++){
 		m_jucatori.push_back(Player( ));
-        CardSerialization::writeObject(fdClientResp[i], m_jucatori.back());
+		m_server->writeClient(i, m_jucatori.back());
+
 	}
 
     std::weak_ptr<Carte> carteArsa = Card::generareCarte( );
@@ -92,12 +34,7 @@ Poker::Poker()
 Poker::~Poker()
 {
 	//cleaning
-    for (int i = 0, n = fdClientResp.size(); i < n; i++){
-        close( fdClientResp[i] );
-        close( fdClientRecv[i] );
-    }
-
-    close(listenFd);
+	m_server->destroy();
 
     for(auto& combinatii : combinatiiPosibile){
 		delete combinatii;
@@ -105,8 +42,6 @@ Poker::~Poker()
 	
 	Card::reset( );
 
-	fdClientRecv.clear();
-	fdClientResp.clear();
 	m_jucatori.clear();
 	m_cartiAratate.clear();
 	combinatiiPosibile.clear( );
@@ -156,9 +91,7 @@ void Poker::check( )
 	}
 
 	//trimitem datele
-    for(const int& fd : fdClientResp){
-        CardSerialization::writeObject(fd, cartiCastigatoare , Date::Castigat , mesaj);
-    }
+	m_server->writeAllClients(cartiCastigatoare , Date::Castigat , mesaj);
 }
 
 void Poker::run( )
@@ -176,7 +109,7 @@ void Poker::run( )
 		std::weak_ptr<Carte> carteArsa = Card::generareCarte( );
 
 		//trimiterea cartilor extrase catre clienti
-        trimiteDate( cartiPuse, Date::CartiMasa, "");
+		m_server->writeAllClients(cartiPuse, Date::CartiMasa);
         m_cartiAratate.insert(m_cartiAratate.end(), cartiPuse.begin(), cartiPuse.end());
 
 		//user input
@@ -186,25 +119,18 @@ void Poker::run( )
 	check( );
 }
 
-void Poker::trimiteDate(const std::vector<_Carte>& cartiPuse,const Date& status,const std::string& mesaj  )
-{
-    for(const int& fd : fdClientResp){
-        CardSerialization::writeObject(fd , cartiPuse, status , mesaj);
-    }
-}
-
 void Poker::bids()
 {
 	unsigned int index = 0;
-	unsigned int n = fdClientRecv.size();
+	unsigned int n = m_jucatori.size();
 	bool run = true;
 
 	while( run ){
 		char resp = 1;
-		CardSerialization::writeAction(fdClientResp[ index ], resp);
+		m_server->writeClientAction(index,resp);
 
 		//daca o dat fold decrementam i ca sa nu sarim peste un jucator
-		if( handleInput( CardSerialization::readAction(fdClientRecv[ index ]), index) == true && index != n -1){
+		if( handleInput(m_server->readClientAction(index), index) == true && index != n -1){
 			index--;
 			n--;
 		}
@@ -214,11 +140,7 @@ void Poker::bids()
 	}
 
 	resetCheck();
-	
-	for(const int& fd : fdClientResp){
-		unsigned char resp = Exit;
-		CardSerialization::writeAction(fd, resp);
-	}
+	m_server->writeAllClientsAction(Exit);
 }
 
 bool Poker::handleInput(char input, int index)
@@ -234,18 +156,10 @@ bool Poker::handleInput(char input, int index)
 
 	case Fold:
 		//Jucatorul iese din joc
-	{
 		m_jucatori.erase( m_jucatori.begin() + index);
-		close(fdClientRecv[index]);
-
-		char resp = Exit;
-		write(fdClientResp[index], &resp, sizeof(resp));
-		close(fdClientResp[index]);
-
-		fdClientResp.erase( fdClientResp.begin() + index);
-		fdClientRecv.erase( fdClientRecv.begin() + index);
+		m_server->writeClientAction(index, Exit);
+		m_server->closeCommunication(index);
 		return true;
-	}
 		break;
 
 	case Call:

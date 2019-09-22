@@ -1,17 +1,6 @@
 #ifndef POKER_H
 #define POKER_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <pthread.h>
-
 #include<vector>
 #include <map>
 #include <set>
@@ -34,11 +23,8 @@ class Poker
 {
 private:
     //Server
-    int listenFd = 0;
     const int port = 5000;
-    std::vector<int> fdClientRecv;
-    std::vector<int> fdClientResp;
-    std::shared_ptr< CardSerialization> server;
+    std::shared_ptr< CardSerialization> m_server;
 
     //Poker
     std::vector<Player> m_jucatori;
@@ -50,7 +36,6 @@ private:
 private:
 	void check( );
     void bids();
-    void trimiteDate( const std::vector<_Carte>& cartiPuse,const Date& status,const std::string& mesaj);
     bool handleInput(char input, int index);
 
     bool checkPlayers();
