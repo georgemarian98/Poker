@@ -1,0 +1,11 @@
+﻿  Card.cpp
+  Combo.cpp
+  ComboHand.cpp
+  Player.cpp
+  Poker.cpp
+  Source.cpp
+  Generating Code...
+D:\Proiecte\Poker\Poker\Source.cpp(22,12): warning C4244:  'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\Proiecte\Poker\Poker\Card.cpp(34): warning C4715:  'Card::compareToNumber': not all control paths return a value
+D:\Proiecte\Poker\Poker\Card.cpp(47): warning C4715:  'Card::compareToSymbol': not all control paths return a value
+  Poker.vcxproj -> D:\Proiecte\Poker\x64\Debug\Poker.exe
