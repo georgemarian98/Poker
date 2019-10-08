@@ -38,7 +38,7 @@ private:
     void bids();
     bool handleInput(char input, int index);
 
-    bool checkPlayers();
+    bool checkPlayers() const;
     void resetCheck();
 
 public:

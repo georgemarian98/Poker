@@ -6,7 +6,7 @@
     4 - Exit
 */
 
-std::shared_ptr< CardSerialization> CardSerialization::instance = NULL;
+std::shared_ptr<CardSerialization> CardSerialization::m_instance = NULL;
 
 CardSerialization::CardSerialization(int port) : port(port)
 {
@@ -68,14 +68,14 @@ CardSerialization::CardSerialization(int port) : port(port)
 
 std::shared_ptr< CardSerialization> CardSerialization::getInstance(const int port)
 {
-    if( instance == NULL){
-        instance = std::shared_ptr< CardSerialization>(new CardSerialization(port));
+    if( m_instance == NULL){
+        m_instance = std::shared_ptr< CardSerialization>(new CardSerialization(port));
     }
 
-    return instance;
+    return m_instance;
 }
 
-void CardSerialization::destroy()
+void CardSerialization::destroy() 
 {
     close(listenFd);
 
@@ -89,7 +89,7 @@ void CardSerialization::destroy()
 
 }
 
-bool CardSerialization::writeClient(const int index, Player& jucator)
+bool CardSerialization::writeClients(const int index, Player& jucator) 
 {
     writeObject(fdClientResp[index], jucator.getCarti() , 2);
 
@@ -102,14 +102,14 @@ bool CardSerialization::writeClient(const int index, Player& jucator)
     return true;
 }
 
-void CardSerialization::writeAllClients(const std::vector<_Carte>& input, const char& flag, const std::string& mesaj)
+void CardSerialization::writeClients(const std::vector<_Carte>& input, const char& flag, const std::string& mesaj)
 {
     for(const int& fd : fdClientResp){
         writeObject(fd, input ,flag , mesaj);
     }
 }
 
-bool CardSerialization::writeClientAction(const int index, const char& flag)
+bool CardSerialization::writeClients(const int index, const char& flag)
 {
     if(write(fdClientResp[index], &flag, sizeof(flag)) < 0){
         perror("Scriere actiune");
@@ -119,14 +119,14 @@ bool CardSerialization::writeClientAction(const int index, const char& flag)
     return true;
 }
 
-void CardSerialization::writeAllClientsAction(const char& flag)
+void CardSerialization::writeClients(const char& flag)
 {
     for(unsigned int i = 0,n = fdClientResp.size(); i < n; i++){
-        writeClientAction(i, flag);
+        writeClients(i, flag);
     }
 }
 
-void CardSerialization::closeCommunication(const int index)
+void CardSerialization::closeCommunication(const int index) 
 {
     close(fdClientRecv[index]);
     close(fdClientResp[index]);

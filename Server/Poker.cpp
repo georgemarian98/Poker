@@ -12,7 +12,7 @@ Poker::Poker()
 	//Trimiterea cartiilor din mana catre jucatori 
 	for(int i = 0; i < noJucatori; i++){
 		m_jucatori.push_back(Player( ));
-		m_server->writeClient(i, m_jucatori.back());
+		m_server->writeClients(i, m_jucatori.back());
 
 	}
 
@@ -47,7 +47,7 @@ Poker::~Poker()
 	combinatiiPosibile.clear( );
 }
 
-void Poker::check( )
+void Poker::check( ) 
 {
 	struct Mesaj{
 		float priority;
@@ -91,7 +91,7 @@ void Poker::check( )
 	}
 
 	//trimitem datele
-	m_server->writeAllClients(cartiCastigatoare , Date::Castigat , mesaj);
+	m_server->writeClients(cartiCastigatoare , Date::Castigat , mesaj);
 }
 
 void Poker::run( )
@@ -109,7 +109,7 @@ void Poker::run( )
 		std::weak_ptr<Carte> carteArsa = Card::generareCarte( );
 
 		//trimiterea cartilor extrase catre clienti
-		m_server->writeAllClients(cartiPuse, Date::CartiMasa);
+		m_server->writeClients(cartiPuse, Date::CartiMasa);
         m_cartiAratate.insert(m_cartiAratate.end(), cartiPuse.begin(), cartiPuse.end());
 
 		//user input
@@ -127,7 +127,7 @@ void Poker::bids()
 
 	while( run ){
 		char resp = 1;
-		m_server->writeClientAction(index,resp);
+		m_server->writeClients(index,resp);
 
 		//daca o dat fold decrementam i ca sa nu sarim peste un jucator
 		if( handleInput(m_server->readClientAction(index), index) == true && index != n -1){
@@ -140,10 +140,10 @@ void Poker::bids()
 	}
 
 	resetCheck();
-	m_server->writeAllClientsAction(Exit);
+	m_server->writeClients(Exit);
 }
 
-bool Poker::handleInput(char input, int index)
+bool Poker::handleInput(char input, int index) 
 {
 	std::cout << "Am primit: " << (int)input << ", de la jucatorul: " << index << std::endl;
 
@@ -157,7 +157,7 @@ bool Poker::handleInput(char input, int index)
 	case Fold:
 		//Jucatorul iese din joc
 		m_jucatori.erase( m_jucatori.begin() + index);
-		m_server->writeClientAction(index, Exit);
+		m_server->writeClients(index, Exit);
 		m_server->closeCommunication(index);
 		return true;
 		break;
@@ -180,9 +180,9 @@ bool Poker::handleInput(char input, int index)
 	
 }
 
-bool Poker::checkPlayers()
+bool Poker::checkPlayers() const
 {
-	for(Player& jucator : m_jucatori){
+	for(const Player& jucator : m_jucatori){
 		if( jucator.getCheck() == false)
 			return false;
 	}

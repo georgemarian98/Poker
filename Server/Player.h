@@ -17,8 +17,8 @@ public:
 	std::vector<_Carte> getCarti( ) { return {carti[0],carti[1]}; };
 
 	void setCheck(bool _check) { this->check = _check;};
-	bool getCheck() { return check;};
-	unsigned int& getBuget() { return buget;};
+	const bool getCheck() const { return check;};
+	const unsigned int& getBuget() const { return buget;};
 	   
 	friend std::ostream& operator<< (std::ostream& out, const Player& jucator){
 		out << *jucator.carti[0] << " " << *jucator.carti[1];

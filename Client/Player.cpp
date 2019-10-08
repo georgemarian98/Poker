@@ -54,7 +54,7 @@ void Player::run()
     while ( run ){
         //flag pentru datele ce urmeaza sa fie trimise
         const unsigned char flag = CardSerialization::readAction<unsigned char>(sockFdRecv);
-        
+
         std::system("clear");
         run = checkResponse(flag, CartiMasa);
 
@@ -156,6 +156,10 @@ void Player::writeAction(bool action)
             std::cout << "Ce alegi: ";
             int resp;
             std::cin >> resp;
+
+            if(resp != 1 && resp != 2 && resp != 3 && resp !=4)
+                resp = 2;
+                
             CardSerialization::writeAction(sockFdResp, resp);
         }
     }
