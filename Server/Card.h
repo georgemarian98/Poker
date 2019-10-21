@@ -27,7 +27,7 @@ struct Carte{
 	}
 };
 
-#define _Carte std::shared_ptr<Carte>
+typedef std::shared_ptr<Carte> _Carte;
 
 class Card
 {
