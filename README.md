@@ -1,3 +1,5 @@
+![Conda](https://img.shields.io/conda/pn/conda-forge/python)
+
 # Poker
 
 The project recreates the classic game of texas hold 'em poker. Poker is any of a number of card games in which players wager over which hand is best according to that specific game's rules in ways similar to these rankings. 
