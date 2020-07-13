@@ -1,4 +1,4 @@
-/conda/pn/:channel/:package
+![Conda](https://img.shields.io/conda/pn/conda-forge/python)
 
 # Poker
 
