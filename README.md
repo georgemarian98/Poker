@@ -1,3 +1,5 @@
+/conda/pn/:channel/:package
+
 # Poker
 
 Poker in retea(oarecum) pentru linux.
